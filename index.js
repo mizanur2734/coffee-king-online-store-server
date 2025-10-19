@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 3000;
 const app = express();
 
@@ -23,13 +23,27 @@ async function run() {
     const database = client.db("coffee-king");
     const coffeeCollection = database.collection('coffees')
 
+    // all coffee
+    app.get("/coffees", async(req, res) =>{
+        const allCoffees = await coffeeCollection.find().toArray()
+        res.send(allCoffees)
+    })
+
     // save a coffee data in the database though post request
     app.post("/add-coffee", async (req, res) =>{
         const coffeeData = req.body;
         console.log(coffeeData)
         const result = await coffeeCollection.insertOne(coffeeData)
         res.send(result)
-        // res.status(201).send({message: "data recevide, thank you",})
+    })
+
+    // get a signgle coffe by id
+     app.get("/coffee/:id", async(req, res) =>{
+        const id = req.params.id
+        const filter = { _id: new ObjectId(id)}
+        const coffee = await coffeeCollection.findOne(filter)
+        console.log(coffee)
+        res.send(coffee)
     })
 
 
